@@ -6,7 +6,6 @@ const auth = require('./auth')
 
 router.post('/', auth, async (req, res, next) => {
   try {
-    // if(req.session.user){
       const {
         username,
         nickname,
@@ -34,16 +33,34 @@ router.post('/', auth, async (req, res, next) => {
         data
       })
     }
-    // else {
-    //   res.json({
-    //     code:403,
-    //     msg:'未登录状态不能发表笔记'
-    //   })
-    // }
    catch (err) {
     next(err)
   }
 
+})
+
+router.get('/', auth, async (req, res, next) => {
+  try {
+    let {page=1, page_size=10} = req.query
+    page = parseInt(page)
+    page_size = parseInt(page_size)
+
+    const dataList = await adminUserModel
+        .find()
+        .skip((page-1)*page_size)
+        .limit(page_size)
+        .sort({_id: -1})
+        .select('-password')
+    // console.log(dataList)
+    res.json({
+      code: 200,
+      data: dataList,
+      msg: 'success',
+
+    })
+  }catch(err){
+    next(err)
+  }
 })
 
 // 路由 admin/adminUser/login
@@ -54,7 +71,8 @@ router.post('/login', async (req, res, next) => {    //登录模块
       const user = await adminUserModel.findOne({username})
       if(user){      //有没有这个用户
         if(password == user.password){
-          req.session.user == user    //将用户信息存到session
+          req.session.user = user    //将用户信息存到session
+          // console.log(req.session.user)
           res.json({
             code: 200,
             msg: '登陆成功',

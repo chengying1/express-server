@@ -17,7 +17,7 @@ app.use(session({
   secret: 'dangjian',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false },
+  cookie: { secure: false,  },
   store: new MongoStore({ mongooseConnection: mongooseConnect })
 }))
 
